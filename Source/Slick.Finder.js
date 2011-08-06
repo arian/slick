@@ -74,7 +74,7 @@ local.setDocument = function(document){
 
 	var selected, id = 'slick_uniqueid';
 	var testNode = document.createElement('div');
-	
+
 	var testRoot = document.body || document.getElementsByTagName('body')[0] || root;
 	testRoot.appendChild(testNode);
 
@@ -125,7 +125,7 @@ local.setDocument = function(document){
 
 			features.brokenGEBCN = cachedGetElementsByClassName || brokenSecondClassNameGEBCN;
 		}
-		
+
 		if (testNode.querySelectorAll){
 			// IE 8 returns closed nodes (EG:"</foo>") for querySelectorAll('*') for some documents
 			try {
@@ -187,8 +187,8 @@ local.setDocument = function(document){
 	features.getAttribute = (features.isHTMLDocument && brokenFormAttributeGetter) ? function(node, name){
 		var method = this.attributeGetters[name];
 		if (method) return method.call(node);
-		var attributeNode = node.getAttributeNode(name);
-		return (attributeNode) ? attributeNode.nodeValue : null;
+		var value = node.getAttribute(name);
+		return (!value && !features.hasAttribute(node, name)) ? null : value;
 	} : function(node, name){
 		var method = this.attributeGetters[name];
 		return (method) ? method.call(node) : node.getAttribute(name);
@@ -251,7 +251,7 @@ var reSimpleSelector = /^([#.]?)((?:[\w-]+|\*))$/,
 local.search = function(context, expression, append, first){
 
 	var found = this.found = (first) ? null : (append || []);
-	
+
 	if (!context) return found;
 	else if (context.navigator) context = context.document; // Convert the node from a window to a document
 	else if (!context.nodeType) return found;
@@ -294,7 +294,7 @@ local.search = function(context, expression, append, first){
 				if (!this.isHTMLDocument || !contextIsDocument) break simpleSelectors;
 				node = context.getElementById(name);
 				if (!node) return found;
-				if (this.idGetsName && node.getAttributeNode('id').nodeValue != name) break simpleSelectors;
+				if (this.idGetsName && node.getAttribute('id') != name) break simpleSelectors;
 				if (first) return node || null;
 				if (!(hasOthers && uniques[this.getUID(node)])) found.push(node);
 
@@ -557,7 +557,7 @@ local.matchNode = function(node, selector){
 			return this.nativeMatchesSelector.call(node, selector.replace(/\[([^=]+)=\s*([^'"\]]+?)\s*\]/g, '[$1="$2"]'));
 		} catch(matchError) {}
 	}
-	
+
 	var parsed = this.Slick.parse(selector);
 	if (!parsed) return true;
 
@@ -624,19 +624,18 @@ var combinators = {
 		if (this.isHTMLDocument){
 			getById: if (id){
 				item = this.document.getElementById(id);
-				if ((!item && node.all) || (this.idGetsName && item && item.getAttributeNode('id').nodeValue != id)){
+				if ((!item && node.all) || (this.idGetsName && item && local.getAttribute(item, 'id') != id)){
 					// all[id] returns all the elements with that name or id inside node
 					// if theres just one it will return the element, else it will be a collection
 					children = node.all[id];
 					if (!children) return;
 					if (!children[0]) children = [children];
 					for (i = 0; item = children[i++];){
-						var idNode = item.getAttributeNode('id');
-						if (idNode && idNode.nodeValue == id){
+						if (local.getAttribute(item, 'id') == id){
 							this.push(item, tag, null, classes, attributes, pseudos);
 							break;
 						}
-					} 
+					}
 					return;
 				}
 				if (!item){
@@ -845,7 +844,7 @@ var pseudos = {
 	'root': function(node){
 		return (node === this.root);
 	},
-	
+
 	'selected': function(node){
 		return node.selected;
 	}
@@ -874,7 +873,7 @@ local.attributeGetters = {
 	'style': function(){
 		return (this.style) ? this.style.cssText : this.getAttribute('style');
 	},
-	
+
 	'tabindex': function(){
 		var attributeNode = this.getAttributeNode('tabindex');
 		return (attributeNode && attributeNode.specified) ? attributeNode.nodeValue : null;
