@@ -385,7 +385,7 @@ local.search = function(context, expression, append, first){
 		}
 		/*</query-selector-override>*/
 
-		parsed = this.Slick.parse(expression);
+		parsed = Slick.parse(expression);
 		if (!parsed.length) return found;
 	} else if (expression == null){ // there is no expression
 		return found;
@@ -564,7 +564,7 @@ local.matchNode = function(node, selector){
 		} catch(matchError) {}
 	}
 
-	var parsed = this.Slick.parse(selector);
+	var parsed = Slick.parse(selector);
 	if (!parsed) return true;
 
 	// simple (single) selectors
