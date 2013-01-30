@@ -764,13 +764,11 @@ var finder = function(context){
 
 // ... API ...
 
-var slick = function(expression, context){
-    return slick.search(expression, context)
-}
-
-slick.search = function(expression, context, found){
+slick = function(expression, context, found){
     return finder(context).search(context, expression, found)
 }
+
+slick.search = slick
 
 slick.find = function(expression, context){
     return finder(context).search(context, expression)[0] || null
